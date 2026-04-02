@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  balance  Float  @default(0)
+  avatar   String?
+  role     String @default("user") // "user" or "admin"
+  
+  walletTransactions WalletTransaction[]
+  deposits           Deposit[]
+}
+
+model WalletTransaction {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String   // deposit, bet, win, refund
+  amount     Float
+  status     String   // completed, failed
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model BankAccount {
+  id            String   @id @default(uuid())
+  bankName      String
+  accountNumber String
+  accountHolder String
+  qrCode        String?
+  status        String   @default("active") // active, inactive
+  deposits      Deposit[]
+}
+
+model Deposit {
+  id              String   @id @default(uuid())
+  userId          String
+  amount          Float
+  bankAccountId   String
+  transferNote    String
+  status          String   @default("pending") // pending, approved, rejected
+  createdAt       DateTime @default(now())
+
+  user            User        @relation(fields: [userId], references: [id])
+  bankAccount     BankAccount @relation(fields: [bankAccountId], references: [id])
+}
+
+model Room {
+  id         String   @id @default(uuid())
+  hostId     String
+  opponentId String?
+  betAmount  Float
+  gameType   String   @default("chess") // "chess" or "xiangqi"
+  status     String   @default("waiting") // waiting, playing, finished
+  winnerId   String?
+  createdAt  DateTime @default(now())
+}
