@@ -16,6 +16,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
     "@fastify/multipart": "^9.4.0",
     "@fastify/static": "^9.0.0",
@@ -27,6 +28,7 @@
     "jsonwebtoken": "^9.0.3",
     "prisma": "^6.19.3",
     "socket.io": "^4.8.3",
+    "uuid": "^13.0.0",
     "xiang.js": "^0.1.1",
     "xiangqi.ts": "^0.0.8"
   },
@@ -35,6 +37,7 @@
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
+    "@types/uuid": "^10.0.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }

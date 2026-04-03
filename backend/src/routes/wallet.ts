@@ -1,26 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { prisma } from '../db.js';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET: string = process.env.JWT_SECRET || 'super-secret-chess-key';
-
-// Middleware to verify JWT
-const authenticate = async (request: any, reply: any) => {
-  const authHeader = request.headers.authorization;
-  if (!authHeader) return reply.status(401).send({ error: 'Unauthorized' });
-
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET as string) as any;
-    request.user = decoded;
-  } catch (err) {
-    return reply.status(401).send({ error: 'Invalid token' });
-  }
-};
+import { verifyAuth } from '../middleware/auth.js';
 
 export const walletRoutes: FastifyPluginAsync = async (app) => {
   // Add onRequest hook to protect all routes in this plugin
-  app.addHook('onRequest', authenticate);
+  app.addHook('onRequest', verifyAuth);
 
   // 1. Get Wallet Balance and Transactions
   app.get('/', async (request: any, reply) => {

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { AuthService } from '@/services/api.service';
 
 interface User {
   id: string;
@@ -8,21 +9,32 @@ interface User {
 }
 
 interface AuthState {
-  token: string | null;
   user: User | null;
-  setAuth: (token: string, user: User) => void;
+  setAuth: (user: User | null) => void;
   updateBalance: (balance: number) => void;
   logout: () => void;
+  checkAuth: () => Promise<void>;
 }
 
 // Persist simple state to localStorage in init component
 export const useAuthStore = create<AuthState>((set) => ({
-  token: null,
   user: null,
-  setAuth: (token, user) => set({ token, user }),
+  setAuth: (user) => set({ user }),
   updateBalance: (balance) => set((state) => ({ user: state.user ? { ...state.user, balance } : null })),
   logout: () => {
-    localStorage.removeItem('chess-auth-token');
-    set({ token: null, user: null });
+    localStorage.removeItem('chess-auth-user'); // optionally
+    set({ user: null });
   },
+  checkAuth: async () => {
+    try {
+      const userData = await AuthService.getMe();
+      if (userData) {
+        set({ user: userData });
+      } else {
+        set({ user: null });
+      }
+    } catch (error) {
+      set({ user: null });
+    }
+  }
 }));

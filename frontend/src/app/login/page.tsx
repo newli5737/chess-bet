@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { AuthService } from '@/services/api.service';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Loader2, Swords } from 'lucide-react';
 
@@ -21,11 +21,9 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await api.post('/api/auth/login', { email, password });
-      const { token, user } = res.data;
+      const { user } = await AuthService.login({ email, password });
       
-      localStorage.setItem('chess-auth-token', token);
-      setAuth(token, user);
+      setAuth(user);
       
       router.push('/');
     } catch (err: any) {

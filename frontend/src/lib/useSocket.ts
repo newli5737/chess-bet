@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
-import { API_URL } from './api';
+import { SOCKET_URL } from './api';
 
 let socketInstance: Socket | null = null;
 
 export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(socketInstance?.connected || false);
   const [socket, setSocket] = useState<Socket | null>(socketInstance);
-  const token = useAuthStore(state => state.token);
+  const user = useAuthStore(state => state.user);
 
   useEffect(() => {
-    if (!token) return;
+    if (!user) return;
 
     if (!socketInstance) {
-      socketInstance = io(API_URL, {
-        auth: { token },
+      socketInstance = io(SOCKET_URL, {
+        withCredentials: true,
         transports: ['websocket', 'polling'], // Fallback to polling if websocket is strict
       });
       setSocket(socketInstance);
@@ -43,7 +43,7 @@ export const useSocket = () => {
         socketInstance?.off('disconnect', onDisconnect);
       };
     }
-  }, [token]);
+  }, [user]);
 
   return { socket, isConnected };
 };

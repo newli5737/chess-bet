@@ -1,27 +1,9 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { prisma } from '../db.js';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET: string = process.env.JWT_SECRET || 'super-secret-chess-key';
-
-const authenticateAdmin = async (request: any, reply: any) => {
-  const authHeader = request.headers.authorization;
-  if (!authHeader) return reply.status(401).send({ error: 'Unauthorized' });
-
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET as string) as any;
-    if (decoded.role !== 'admin') {
-       return reply.status(403).send({ error: 'Forbidden. Admins only.' });
-    }
-    request.user = decoded;
-  } catch (err) {
-    return reply.status(401).send({ error: 'Invalid token' });
-  }
-};
+import { verifyAdmin } from '../middleware/auth.js';
 
 export const adminRoutes: FastifyPluginAsync = async (app) => {
-  app.addHook('onRequest', authenticateAdmin);
+  app.addHook('onRequest', verifyAdmin);
 
   app.get('/users', async (request, reply) => {
     const users = await prisma.user.findMany({

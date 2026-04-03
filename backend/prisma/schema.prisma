@@ -14,6 +14,7 @@ model User {
   balance  Float  @default(0)
   avatar   String?
   role     String @default("user") // "user" or "admin"
+  sessionId String?
   
   walletTransactions WalletTransaction[]
   deposits           Deposit[]

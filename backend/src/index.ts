@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
+import cookie from '@fastify/cookie';
 import { Server } from 'socket.io';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
@@ -13,7 +14,12 @@ const __dirname = path.dirname(__filename);
 const app = fastify({ logger: true });
 
 app.register(cors, {
-  origin: '*',
+  origin: true,
+  credentials: true,
+});
+
+app.register(cookie, {
+  secret: 'super-secret-cookie',
 });
 
 import { authRoutes } from './routes/auth.js';
@@ -29,11 +35,11 @@ app.register(fastifyStatic, {
   prefix: '/uploads/',
 });
 
-app.register(authRoutes, { prefix: '/api/auth' });
-app.register(walletRoutes, { prefix: '/api/wallet' });
+app.register(authRoutes, { prefix: '/api/v1/auth' });
+app.register(walletRoutes, { prefix: '/api/v1/wallet' });
 
 import { adminRoutes } from './routes/admin.js';
-app.register(adminRoutes, { prefix: '/api/admin' });
+app.register(adminRoutes, { prefix: '/api/v1/admin' });
 
 import setupSocketHandlers from './sockets.js';
 
@@ -41,7 +47,8 @@ const start = async () => {
   try {
     const io = new Server(app.server, {
       cors: {
-        origin: '*',
+        origin: true,
+        credentials: true,
         methods: ['GET', 'POST']
       }
     });
