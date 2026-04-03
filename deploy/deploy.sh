@@ -1,14 +1,9 @@
 #!/bin/bash
 set -e
 
-REPO_DIR="/var/www/chess-bet"
-REPO_URL="https://github.com/newli5737/chess-bet.git"
+REPO_DIR="/home/ubuntu/chess-bet"
 
-if [ -d "$REPO_DIR" ]; then
-  cd $REPO_DIR && git pull
-else
-  git clone $REPO_URL $REPO_DIR
-fi
+cd $REPO_DIR && git pull
 
 # ── Backend ────────────────────────────────────────────────
 cd $REPO_DIR/backend
