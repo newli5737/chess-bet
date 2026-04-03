@@ -5,10 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "db:seed": "tsx prisma/seed.ts",
+    "dev":        "tsx watch src/index.ts",
+    "build":      "tsc --outDir dist",
+    "start":      "node dist/src/index.js",
+    "db:seed":    "tsx prisma/seed.ts",
     "db:migrate": "tsx prisma/migrate.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test":       "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
