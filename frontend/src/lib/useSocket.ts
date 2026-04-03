@@ -1,9 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
-import { SOCKET_URL } from './api';
+import { SOCKET_URL, SOCKET_PATH } from './api';
 
 let socketInstance: Socket | null = null;
+
+export const getSocket = () => socketInstance;
+
+export const disconnectSocket = () => {
+  if (socketInstance) {
+    socketInstance.disconnect();
+    socketInstance = null;
+  }
+};
 
 export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(socketInstance?.connected || false);
@@ -11,38 +20,37 @@ export const useSocket = () => {
   const user = useAuthStore(state => state.user);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // When user logs out, disconnect socket
+      if (socketInstance) {
+        disconnectSocket();
+        setSocket(null);
+        setIsConnected(false);
+      }
+      return;
+    }
 
     if (!socketInstance) {
       socketInstance = io(SOCKET_URL, {
+        path: SOCKET_PATH,
         withCredentials: true,
-        transports: ['websocket', 'polling'], // Fallback to polling if websocket is strict
+        transports: ['websocket', 'polling'],
       });
-      setSocket(socketInstance);
-      
-      socketInstance.on('connect', () => {
-        setIsConnected(true);
-      });
-
-      socketInstance.on('disconnect', () => {
-        setIsConnected(false);
-      });
-    } else {
-      setSocket(socketInstance);
-      setIsConnected(socketInstance.connected);
-      
-      // Still need to re-register these in case the component wants the state changes
-      const onConnect = () => setIsConnected(true);
-      const onDisconnect = () => setIsConnected(false);
-      
-      socketInstance.on('connect', onConnect);
-      socketInstance.on('disconnect', onDisconnect);
-      
-      return () => {
-        socketInstance?.off('connect', onConnect);
-        socketInstance?.off('disconnect', onDisconnect);
-      };
     }
+
+    setSocket(socketInstance);
+    setIsConnected(socketInstance.connected);
+
+    const onConnect = () => setIsConnected(true);
+    const onDisconnect = () => setIsConnected(false);
+
+    socketInstance.on('connect', onConnect);
+    socketInstance.on('disconnect', onDisconnect);
+
+    return () => {
+      socketInstance?.off('connect', onConnect);
+      socketInstance?.off('disconnect', onDisconnect);
+    };
   }, [user]);
 
   return { socket, isConnected };
