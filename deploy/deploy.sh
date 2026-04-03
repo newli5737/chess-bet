@@ -44,7 +44,7 @@ pm2 start $REPO_DIR/backend/node_modules/.bin/tsx \
   --cwd $REPO_DIR/backend \
   -- src/index.ts
 
-pm2 start "npm run start" \
+pm2 start "npm run start -- -p 3010" \
   --name chess-frontend \
   --cwd $REPO_DIR/frontend
 
