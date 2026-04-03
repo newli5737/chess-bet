@@ -8,58 +8,73 @@ generator client {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
-  balance  Float  @default(0)
-  avatar   String?
-  role     String @default("user") // "user" or "admin"
+  id        String  @id @default(uuid())
+  email     String  @unique
+  password  String
+  balance   Int     @default(0)
+  avatar    String?
+  role      String  @default("user") // "user" or "admin"
   sessionId String?
-  
+
   walletTransactions WalletTransaction[]
   deposits           Deposit[]
+  withdrawals        Withdrawal[]
+}
+
+model Withdrawal {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Int
+  bankName      String
+  accountNumber String
+  accountHolder String
+  note          String   @default("")
+  status        String   @default("pending") // pending, approved, rejected
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model WalletTransaction {
-  id         String   @id @default(uuid())
-  userId     String
-  type       String   // deposit, bet, win, refund
-  amount     Float
-  status     String   // completed, failed
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // deposit, bet, win, refund
+  amount    Int
+  status    String   // completed, failed
+  createdAt DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model BankAccount {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   bankName      String
   accountNumber String
   accountHolder String
   qrCode        String?
-  status        String   @default("active") // active, inactive
+  status        String    @default("active") // active, inactive
   deposits      Deposit[]
 }
 
 model Deposit {
-  id              String   @id @default(uuid())
-  userId          String
-  amount          Float
-  bankAccountId   String
-  transferNote    String
-  status          String   @default("pending") // pending, approved, rejected
-  createdAt       DateTime @default(now())
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Int
+  bankAccountId String
+  transferNote  String
+  status        String   @default("pending") // pending, approved, rejected
+  createdAt     DateTime @default(now())
 
-  user            User        @relation(fields: [userId], references: [id])
-  bankAccount     BankAccount @relation(fields: [bankAccountId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
 }
 
 model Room {
   id         String   @id @default(uuid())
   hostId     String
   opponentId String?
-  betAmount  Float
-  gameType   String   @default("chess") // "chess" or "xiangqi"
+  betAmount  Int
+  gameType   String   @default("xiangqi") // "xiangqi"
   status     String   @default("waiting") // waiting, playing, finished
   winnerId   String?
   createdAt  DateTime @default(now())
